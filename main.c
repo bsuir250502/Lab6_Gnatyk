@@ -4,17 +4,9 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
-#define N 150
+#include <stdio.h>
 #define input_buf_size 80
 #define SIZE( x ) (sizeof( x )/sizeof( *x ))
-    struct tree{
-        char* data;
-        struct tree * left;
-        struct tree * right;
-        int n;
-
-    };
 
     void clear_screen()
     {
@@ -25,89 +17,17 @@ extern "C" {
 #endif
     }
 
-    char*gets_s(char *s, size_t buf_size)
-    {
-        char *result;
-        result = fgets(s, buf_size, stdin);
-        result[strlen(s) - 1] = '\0';
-        return result;
-    }
-    tree* create_a_tree( struct tree* tree)
-    {
-        if(tree){
-            return(tree);
-        }
-        if(!(tree = (struct tree *)calloc(1,sizeof(struct tree)))){
-            puts("There is no free memory");
-            return NULL;
-        }
-        puts("Click any number,to fill the root of the tree");
-        tree->data = (char*)calloc(1,sizeof(char)*N);
-        gets_s(tree->data,N);
-        tree->n = 1;
-        return tree;
-    }
+    char Spis1[]="f_bin";
+    char Spis2[]="f_txt";
 
-    void add_nodes_to_the_tree(struct tree* tree)
+    FILE *Open_file(char*file,char*code)
     {
-        struct tree *tr1, *tr2;
-        char * st;
-        int k;
-        int flag;
-        int st_size = SIZE(st);
-        if(!tree){
-            puts("no root\n");
-            return;
+        FILE*f;
+        if(!(f = fopen(file,code))){
+            puts("Error!");
+            exit(1);
         }
-        do{
-            puts("enter the informationfor the end of write- ex");
-            st = (char*)calloc(1,sizeof(char)*N);
-            gets_s(st,st_size);
-            if(!strcmp(st,"ex")){
-                return;
-            }
-            if(!*st)return;
-            tr1 = tree;
-            flag = 0;
-            do{
-                if(!(k = strcmp(st,tr1->data))){
-                    tr1->n++;
-                    flag = 1;
-                }
-                else{
-                    if(k < 0){
-                        if(tr1->left){
-                            tr1 = tr1->left;
-                        }
-                        else flag = 1;
-                    }
-                    else{
-                        if(tr1->right){
-                            tr1= tr1->right;
-                        }
-                        else flag = 1;
-                    }
-                }
-            }
-            while( flag == 0);
-            if(k)
-            {
-                if(!(tr2 = (struct tree *)calloc(1,sizeof(struct tree)))){
-                    puts("There is no free memory\n");
-                    return;
-                }
-                if(k < 0){
-                    tr1->left = tr2;
-                }
-                else{
-                    tr1->right = tr2;
-                }
-                tr2->data = (char*)calloc(1,sizeof(char)*N);
-                strcpy(tr2->data,st);
-                tr2->n = 1;
-            }
-            free(st);
-        }while(1);
+        else return f; 
     }
 
     void checkHelp(void)
@@ -115,15 +35,15 @@ extern "C" {
         printf
             ("=============================================================================================================\n"
             "MANUAL:\n"
-            "filling the tree information \n"
+            "enter the number, \n"
             "=================================OPTIONS=====================================================================\n"
-            "1. input tree root\n"
-            "2. tree view\n"
-            "3. maximum viewing element node\n"
+            "1. To enter numbers into a text and binary file(для окончания ввод нажмите - 0)\n"
+            "2. To view the text and binary file\n"
+            "3. To view the text after removing it from the elements\n"
             "4. Help\n"
             "5. Exit\n"
             "=============================================================================================================\n");
-        exit(0);
+
 
     }
 
@@ -131,80 +51,210 @@ extern "C" {
     {
         char s[input_buf_size];
         int c;
-        puts("1. add information");
-        puts("2. see details ");
-        puts("3. search max");
-        puts("4. Help"); 
-        puts("5. to exit");
+        puts("1. Write the numbers in the text and binary file ");
+        puts("2. View text and binary file ");
+        puts("3. From a text file to remove the numbers contained in a binaryfile "); 
+        puts("4. To exit ");
+        puts("5. Help ");
         do{
             printf("\nEnter the number of the desired item\n");
             gets_s(s, input_buf_size);
             c = atoi(s);
         }
-        while (c < 0 || c > 5);
+        while (c < 0 || c > 6);
         clear_screen();
         return c;
     }
 
-    void see_tree (struct tree * tr1,int level)
+    int* read_tex_f(char*file_name ,int koll_t,int *txt)
     {
-        if(tr1){
-            see_tree(tr1->right,level+5);
+        FILE *f;
+        f = Open_file(Spis2,"r");
+        int i;
+        for (i = 0; i < koll_t; i++) {
+            fscanf(f,"%d",&txt[i]);
+            if (feof(f)) {
+                break;
+            }
         }
-        for(int i = 0; i < level; ++i){
-            printf("   ");
-        }
-        if(tr1){
-            printf("%s\n",tr1->data);
-        }
-        else printf("\n");
-        if(tr1){
-            see_tree(tr1->left,level+5);
-        }
+        return txt;
     }
 
-
-    tree * search_node_maximum_value(struct tree * current,struct tree*max) 
+    int* read_bin_f(char*binary_file_name ,int koll_bin,int *binary)
     {
-        if(current->data > max->data){
-            max = current;
+        FILE *fb;
+        fb = Open_file(Spis1,"rb");
+        int i;
+        for (i = 0; i< koll_bin; i++) {
+            fread(&binary[i],sizeof(int),1,fb);
+            if (feof(fb)) {
+                break;
+            }
         }
-        if(current->left){ 
-            max = search_node_maximum_value(current->left,max); 
-        }
-        if(current->right){
-            max = search_node_maximum_value(current->right,max); 
-        }
-        return max;
+        return binary;
     }
 
-    int main()
+    int * del (int *binary,int *txt,int* koll_t,int koll_bin)
     {
-        int level = 0;
-        struct tree* max=0;
-        struct tree* tree = NULL;
-        tree = create_a_tree(tree);
+        int i,j,del_txt;
+        for(i = 0; i < koll_bin; i++){
+            for(j = 0; j < *koll_t; j++){
+                if(txt[j] == binary[i]){
+                    for(del_txt = j; del_txt < (*koll_t-1); del_txt++){
+                        txt[del_txt] = txt[del_txt +1];
+                    }
+                    *koll_t-=1;
+
+                }
+            }
+        }
+        return txt;
+    }
+
+    int f_creat(char* file_name)
+    {
+        FILE * f;  
+        int i1,koll_t=0;
+        f= Open_file(Spis2,"w+");
+        puts("Enter a number in a TEXT file");
+        puts("To exit, press - 0");
+        while(1){
+            scanf("%d",&i1);
+            if(i1 == 0){
+                break;
+            }
+            koll_t++;
+            fprintf(f,"%3d",i1);
+        }
+        fclose(f);
+        return koll_t;
+    }
+
+    int fb_creat(char* binary_file_name )
+    {
+        int i2,koll_bin=0;
+        FILE * fb;
+        fb= Open_file(Spis1,"w+b");
+        puts("Enter a number in the BINARY file");
+        puts("To exit, press - 0");
+        while(1){
+            scanf("%d",&i2);
+            if(i2 == 0){
+                break;
+            }
+            koll_bin ++;
+            fwrite(&i2,sizeof(int),1,fb);
+        }
+        fclose(fb);
+        return koll_bin;
+    }
+
+    void print_binFile(char* binary_file_name,int koll_bin)
+    {
+        int i;
+        int * bin_ms;
+        bin_ms = (int *) calloc(koll_bin, sizeof(int));
+        FILE * fb;
+        fb = Open_file(Spis1,"rb");
+        printf ("BINARY FILE");
+        for(i = 0; i < koll_bin; i ++) {
+            fread(&bin_ms[i], sizeof(int), 1, fb);
+            if(feof(fb)) {
+                break;
+            }
+        }
+        printf ("\n");
+        for(i = 0; i < koll_bin; i++) {
+            printf("%d",bin_ms[i]);
+        }
+        printf ("\n");
+        fclose(fb);
+    }
+
+    void printf_txtFIle(char*file_name ,int koll_t) {
+        int i;
+        int *t_ms;
+        t_ms = (int *) calloc(koll_t, sizeof(int));
+        FILE * f;
+        f = Open_file(Spis2,"r");
+        printf ("TEXT FILE");
+        for(i = 0; i < koll_t; i ++) {
+            fscanf(f, "%2d", &t_ms[i]);
+            if(feof(f)) {
+                break;
+            }
+        }
+        printf ("\n");
+        for(i = 0; i < koll_t; i++) {
+            printf("%d",t_ms[i]);
+        }
+        printf ("\n");
+        fclose(f);
+    }
+
+    int * search_of_the_same_elem(char*file_name ,int koll_t,char* binary_file_name,int koll_bin)
+    {
+        FILE *f,*fb;
+        int i_txt;
+        int *txt;
+        int *binary;
+        txt = (int *) calloc(koll_t, sizeof(int));
+        binary = (int *) calloc(koll_bin, sizeof(int));
+        fb = Open_file(Spis1,"rb");
+        f = Open_file(Spis2,"r");
+        read_tex_f(file_name ,koll_t,txt);
+        read_bin_f(binary_file_name , koll_bin, binary);
+        rewind(f);
+        rewind(fb);
+        txt= del (binary,txt, &koll_t, koll_bin);
+        f = Open_file(Spis2,"r");
+        for(i_txt = 0; i_txt < koll_t; i_txt++){
+            fprintf(f,"%2d",&txt[i_txt]);
+        }
+        printf_txtFIle(file_name , koll_t);
+        fclose(f);
+        fclose(fb);
+        return 0;
+    }
+
+    int main(int argc, char **argv)
+    {
+
+        FILE *f,*fb;
+        int  koll_t=0,koll_bin=0;
+        fb=Open_file(Spis1,"w+b");
+        f=Open_file(Spis2,"w+");
+        char*  file_name = (char *) calloc(10, sizeof(char));
+        char* binary_file_name = (char *) calloc(10, sizeof(char));
+        if (argc == 3) {
+            strcpy(file_name, argv[1]);
+            strcpy(binary_file_name, argv[2]);
+        }
         char choice;
         while(1){
             choice = menu_select();
-
-            switch (choice){
-            case 1 : 
-                add_nodes_to_the_tree( tree);
+            switch(choice){
+            case 1 :
+                koll_t=f_creat(file_name);
+                koll_bin=fb_creat(binary_file_name);
                 break;
-            case 2 : 
-                see_tree(tree,level);break;
+            case 2 :
+                print_binFile( binary_file_name, koll_bin);
+                printf ("\n");
+                printf_txtFIle(file_name, koll_t);
+                printf ("\n");
+                break;
             case 3 :
-                max = search_node_maximum_value(tree,tree);
-                printf("maximym: %s\n ", max->data );break;
+                search_of_the_same_elem(file_name , koll_t, binary_file_name, koll_bin);
+                break;
             case 4 :
-                checkHelp();break;
-            case 5 :
                 exit(0);break;
+            case 5 :
+                checkHelp();break;
+
             }
         }
     }
-
 
 #ifdef __cplusplus
 }
