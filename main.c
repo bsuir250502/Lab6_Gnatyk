@@ -8,36 +8,27 @@ extern "C" {
 #define input_buf_size 80
 #define SIZE( x ) (sizeof( x )/sizeof( *x ))
 
-    void clear_screen()
-    {
-#ifdef _WIN32
-        system("cls");
-#else
-        system("clear");
-#endif
-    }
+    char spis_1[]="f_bin";
+    char spis_2[]="f_txt";
 
-    char Spis1[]="f_bin";
-    char Spis2[]="f_txt";
-
-    FILE *Open_file(char*file,char*code)
+    FILE *open_file(char*file, char*code)
     {
         FILE*f;
-        if(!(f = fopen(file,code))){
+        if(!(f = fopen(file,code))) {
             puts("Error!");
             exit(1);
         }
         else return f; 
     }
 
-    void checkHelp(void)
+    void check_help(void)
     {
         printf
             ("=============================================================================================================\n"
             "MANUAL:\n"
             "enter the number, \n"
             "=================================OPTIONS=====================================================================\n"
-            "1. To enter numbers into a text and binary file(для окончания ввод нажмите - 0)\n"
+            "1. To enter numbers into a text and binary file(пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ - 0)\n"
             "2. To view the text and binary file\n"
             "3. To view the text after removing it from the elements\n"
             "4. Help\n"
@@ -62,16 +53,16 @@ extern "C" {
             c = atoi(s);
         }
         while (c < 0 || c > 6);
-        clear_screen();
+
         return c;
     }
 
-    int* read_tex_f(char*file_name ,int koll_t,int *txt)
+    int* read_text_file(char*file_name, int number_of_elements_text_file, int *txt)
     {
         FILE *f;
-        f = Open_file(Spis2,"r");
+        f = open_file(spis_2,"r");
         int i;
-        for (i = 0; i < koll_t; i++) {
+        for (i = 0; i < number_of_elements_text_file; i++) {
             fscanf(f,"%d",&txt[i]);
             if (feof(f)) {
                 break;
@@ -80,12 +71,12 @@ extern "C" {
         return txt;
     }
 
-    int* read_bin_f(char*binary_file_name ,int koll_bin,int *binary)
+    int* read_bin_f(char*binary_file_name ,int number_of_elements_binary_file,int *binary)
     {
         FILE *fb;
-        fb = Open_file(Spis1,"rb");
+        fb = open_file(spis_1,"rb");
         int i;
-        for (i = 0; i< koll_bin; i++) {
+        for (i = 0; i< number_of_elements_binary_file; i++) {
             fread(&binary[i],sizeof(int),1,fb);
             if (feof(fb)) {
                 break;
@@ -94,16 +85,16 @@ extern "C" {
         return binary;
     }
 
-    int * del (int *binary,int *txt,int* koll_t,int koll_bin)
+    int * delete_the_item (int *binary,int *txt,int* number_of_elements_text_file,int number_of_elements_binary_file)
     {
-        int i,j,del_txt;
-        for(i = 0; i < koll_bin; i++){
-            for(j = 0; j < *koll_t; j++){
+        int i, j, delete_the_item_txt;
+        for(i = 0; i < number_of_elements_binary_file; i++){
+            for(j = 0; j < *number_of_elements_text_file; j++){
                 if(txt[j] == binary[i]){
-                    for(del_txt = j; del_txt < (*koll_t-1); del_txt++){
-                        txt[del_txt] = txt[del_txt +1];
+                    for(delete_the_item_txt = j; delete_the_item_txt < (*number_of_elements_text_file-1); delete_the_item_txt++){
+                        txt[delete_the_item_txt] = txt[delete_the_item_txt +1];
                     }
-                    *koll_t-=1;
+                    *number_of_elements_text_file-=1;
 
                 }
             }
@@ -111,11 +102,11 @@ extern "C" {
         return txt;
     }
 
-    int f_creat(char* file_name)
+    int loading_the_text_file(char* file_name)
     {
         FILE * f;  
-        int i1,koll_t=0;
-        f= Open_file(Spis2,"w+");
+        int i1, number_of_elements_text_file = 0;
+        f = open_file(spis_2,"w+");
         puts("Enter a number in a TEXT file");
         puts("To exit, press - 0");
         while(1){
@@ -123,18 +114,18 @@ extern "C" {
             if(i1 == 0){
                 break;
             }
-            koll_t++;
+            number_of_elements_text_file++;
             fprintf(f,"%3d",i1);
         }
         fclose(f);
-        return koll_t;
+        return number_of_elements_text_file;
     }
 
-    int fb_creat(char* binary_file_name )
+    int loading_the_binary_file(char* binary_file_name )
     {
-        int i2,koll_bin=0;
+        int i2,number_of_elements_binary_file=0;
         FILE * fb;
-        fb= Open_file(Spis1,"w+b");
+        fb= open_file(spis_1,"w+b");
         puts("Enter a number in the BINARY file");
         puts("To exit, press - 0");
         while(1){
@@ -142,76 +133,76 @@ extern "C" {
             if(i2 == 0){
                 break;
             }
-            koll_bin ++;
+            number_of_elements_binary_file ++;
             fwrite(&i2,sizeof(int),1,fb);
         }
         fclose(fb);
-        return koll_bin;
+        return number_of_elements_binary_file;
     }
 
-    void print_binFile(char* binary_file_name,int koll_bin)
+    void print_bin_file(char* binary_file_name,int number_of_elements_binary_file)
     {
         int i;
         int * bin_ms;
-        bin_ms = (int *) calloc(koll_bin, sizeof(int));
+        bin_ms = (int *) calloc(number_of_elements_binary_file, sizeof(int));
         FILE * fb;
-        fb = Open_file(Spis1,"rb");
+        fb = open_file(spis_1,"rb");
         printf ("BINARY FILE");
-        for(i = 0; i < koll_bin; i ++) {
+        for(i = 0; i < number_of_elements_binary_file; i ++) {
             fread(&bin_ms[i], sizeof(int), 1, fb);
             if(feof(fb)) {
                 break;
             }
         }
         printf ("\n");
-        for(i = 0; i < koll_bin; i++) {
+        for(i = 0; i < number_of_elements_binary_file; i++) {
             printf("%d",bin_ms[i]);
         }
         printf ("\n");
         fclose(fb);
     }
 
-    void printf_txtFIle(char*file_name ,int koll_t) {
+    void printf_txt_file(char*file_name ,int number_of_elements_text_file) {
         int i;
         int *t_ms;
-        t_ms = (int *) calloc(koll_t, sizeof(int));
+        t_ms = (int *) calloc(number_of_elements_text_file, sizeof(int));
         FILE * f;
-        f = Open_file(Spis2,"r");
+        f = open_file(spis_2,"r");
         printf ("TEXT FILE");
-        for(i = 0; i < koll_t; i ++) {
+        for(i = 0; i < number_of_elements_text_file; i ++) {
             fscanf(f, "%2d", &t_ms[i]);
             if(feof(f)) {
                 break;
             }
         }
         printf ("\n");
-        for(i = 0; i < koll_t; i++) {
+        for(i = 0; i < number_of_elements_text_file; i++) {
             printf("%d",t_ms[i]);
         }
         printf ("\n");
         fclose(f);
     }
 
-    int * search_of_the_same_elem(char*file_name ,int koll_t,char* binary_file_name,int koll_bin)
+    int * search_of_the_same_elem(char*file_name ,int number_of_elements_text_file,char* binary_file_name,int number_of_elements_binary_file)
     {
         FILE *f,*fb;
         int i_txt;
         int *txt;
         int *binary;
-        txt = (int *) calloc(koll_t, sizeof(int));
-        binary = (int *) calloc(koll_bin, sizeof(int));
-        fb = Open_file(Spis1,"rb");
-        f = Open_file(Spis2,"r");
-        read_tex_f(file_name ,koll_t,txt);
-        read_bin_f(binary_file_name , koll_bin, binary);
+        txt = (int *) calloc(number_of_elements_text_file, sizeof(int));
+        binary = (int *) calloc(number_of_elements_binary_file, sizeof(int));
+        fb = open_file(spis_1,"rb");
+        f = open_file(spis_2,"r");
+        read_text_file(file_name ,number_of_elements_text_file,txt);
+        read_bin_f(binary_file_name , number_of_elements_binary_file, binary);
         rewind(f);
         rewind(fb);
-        txt= del (binary,txt, &koll_t, koll_bin);
-        f = Open_file(Spis2,"r");
-        for(i_txt = 0; i_txt < koll_t; i_txt++){
+        txt= delete_the_item (binary,txt, &number_of_elements_text_file, number_of_elements_binary_file);
+        f = open_file(spis_2,"r");
+        for(i_txt = 0; i_txt < number_of_elements_text_file; i_txt++){
             fprintf(f,"%2d",&txt[i_txt]);
         }
-        printf_txtFIle(file_name , koll_t);
+        printf_txt_file(file_name , number_of_elements_text_file);
         fclose(f);
         fclose(fb);
         return 0;
@@ -221,10 +212,10 @@ extern "C" {
     {
 
         FILE *f,*fb;
-        int  koll_t=0,koll_bin=0;
-        fb=Open_file(Spis1,"w+b");
-        f=Open_file(Spis2,"w+");
-        char*  file_name = (char *) calloc(10, sizeof(char));
+        int number_of_elements_text_file=0,number_of_elements_binary_file=0;
+        fb = open_file(spis_1,"w+b");
+        f = open_file(spis_2,"w+");
+        char* file_name = (char *) calloc(10, sizeof(char));
         char* binary_file_name = (char *) calloc(10, sizeof(char));
         if (argc == 3) {
             strcpy(file_name, argv[1]);
@@ -235,22 +226,22 @@ extern "C" {
             choice = menu_select();
             switch(choice){
             case 1 :
-                koll_t=f_creat(file_name);
-                koll_bin=fb_creat(binary_file_name);
+                number_of_elements_text_file = loading_the_text_file(file_name);
+                number_of_elements_binary_file = loading_the_binary_file(binary_file_name);
                 break;
             case 2 :
-                print_binFile( binary_file_name, koll_bin);
+                print_bin_file( binary_file_name, number_of_elements_binary_file);
                 printf ("\n");
-                printf_txtFIle(file_name, koll_t);
+                printf_txt_file(file_name, number_of_elements_text_file);
                 printf ("\n");
                 break;
             case 3 :
-                search_of_the_same_elem(file_name , koll_t, binary_file_name, koll_bin);
+                search_of_the_same_elem(file_name , number_of_elements_text_file, binary_file_name, number_of_elements_binary_file);
                 break;
             case 4 :
                 exit(0);break;
             case 5 :
-                checkHelp();break;
+                check_help();break;
 
             }
         }
